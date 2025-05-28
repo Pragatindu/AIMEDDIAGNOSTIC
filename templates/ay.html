@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .chat-container {
+            width: 400px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #1976d2;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            height: 400px;
+            background: #f9f9f9;
+        }
+
+        .message {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .message p {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+
+        .user-message p {
+            background: #1976d2;
+            color: white;
+            text-align: right;
+        }
+
+        .bot-message p {
+            background: #e0e0e0;
+            color: black;
+            text-align: left;
+        }
+
+        .chat-footer {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        #send-btn {
+            padding: 10px 15px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #send-btn:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">AI Chatbot</div>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-footer">
+            <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let messages_store = localStorage.getItem("messages_store");
+            let chatHistory = messages_store ? JSON.parse(messages_store) : [];
+
+            function showMessages() {
+                let chatBody = $("#chat-body");
+                chatBody.html("");
+
+                chatHistory.forEach((msg) => {
+                    let messageClass = msg.role === "user" ? "user-message" : "bot-message";
+                    let messageHtml = `
+                        <div class="message ${messageClass}">
+                            <p>${msg.content}</p>
+                        </div>`;
+                    chatBody.append(messageHtml);
+                });
+
+                chatBody.scrollTop(chatBody[0].scrollHeight);
+            }
+
+            function sendMessage() {
+                let userInput = $("#user-input").val().trim();
+                if (userInput === "") return;
+
+                let userMessage = { role: "user", content: userInput };
+                chatHistory.push(userMessage);
+                showMessages();
+
+                $("#user-input").val(""); 
+
+                $.ajax({
+                    type: "POST",
+                    url: "/HealthCareAssistant",
+                    data: JSON.stringify({ message: userInput }),
+                    contentType: "application/json",
+                    success: function (response) {
+                        let botMessage = { role: "assistant", content: response.reply };
+                        chatHistory.push(botMessage);
+                        localStorage.setItem("messages_store", JSON.stringify(chatHistory));
+                        showMessages();
+                    },
+                    error: function () {
+                        console.error("Error getting response from backend.");
+                    }
+                });
+            }
+
+            $("#send-btn").click(sendMessage);
+            $("#user-input").keypress(function (event) {
+                if (event.which === 13) {
+                    sendMessage();
+                }
+            });
+
+            showMessages();
+        });
+    </script>
+
+</body>
+</html>

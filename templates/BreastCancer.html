@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Breast Cancer Prediction</title>
+</head>
+<body>
+    <h2>Enter Breast Cancer Features</h2>
+    <form  action="/BreastCancer" method="POST">
+        <input type="text" name="radius_mean" placeholder="Radius Mean" required><br>
+        <input type="text" name="texture_mean" placeholder="Texture Mean" required><br>
+        <input type="text" name="perimeter_mean" placeholder="Perimeter Mean" required><br>
+        <input type="text" name="area_mean" placeholder="Area Mean" required><br>
+        <input type="text" name="smoothness_mean" placeholder="Smoothness Mean" required><br>
+        <input type="text" name="compactness_mean" placeholder="Compactness Mean" required><br>
+        <input type="text" name="concavity_mean" placeholder="Concavity Mean" required><br>
+        <input type="text" name="concave_points_mean" placeholder="Concave Points Mean" required><br>
+        <input type="text" name="symmetry_mean" placeholder="Symmetry Mean" required><br>
+        <input type="text" name="fractal_dimension_mean" placeholder="Fractal Dimension Mean" required><br>
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>

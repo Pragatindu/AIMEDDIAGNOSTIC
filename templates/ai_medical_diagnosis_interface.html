@@ -1,0 +1,182 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AI Medical Diagnosis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #eaf6f6;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    h2, h5 {
+      font-weight: bold;
+    }
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #dc3545;
+    }
+    .map-container {
+      height: 400px;
+      border-radius: 12px;
+      border: 2px solid #dc3545;
+    }
+    .hospital-card, .doctor-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: transform 0.3s;
+    }
+    .hospital-card:hover, .doctor-card:hover {
+      transform: scale(1.02);
+    }
+    .doctor-card a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .doctor-card a:hover {
+      text-decoration: underline;
+    }
+    .icon {
+      width: 40px;
+      margin-right: 10px;
+    }
+    .card-section {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+  <!-- Disease Info Section -->
+  <div class="card-section">
+    <h2 class="section-title">⚠ Disease Detected</h2>
+    <h5 id="disease-title" class="text-danger text-center">Loading...</h5>
+    <p><strong>About the disease:</strong></p>
+    <p id="disease-description">Fetching information...</p>
+  </div>
+
+  <!-- Precaution Section -->
+  <div class="card-section bg-light">
+    <h2 class="section-title">🛡️ Precaution & Preventive Measures</h2>
+    <p id="disease-precautions">Fetching prevention info...</p>
+  </div>
+
+  <!-- Hospitals Section -->
+  <div class="card-section">
+    <h2 class="section-title">🏥 Nearby Hospitals</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="hospital-card">
+          <h5>Apollo Hospital</h5>
+          <p>Noida Sector 16, Uttar Pradesh - 201301</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="hospital-card">
+          <h5>Fortis Healthcare</h5>
+          <p>Sector 62, Gurgaon, Delhi NCR - 122001</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="hospital-card">
+          <h5>AIIMS Delhi</h5>
+          <p>Ansari Nagar, South West Delhi - 110029</p>
+        </div>
+      </div>
+    </div>
+    <input id="pac-input" class="form-control mb-3" type="text" placeholder="Search Location">
+    <div id="map" class="map-container mb-3"></div>
+  </div>
+
+  <!-- Doctors Section -->
+  <div class="card-section bg-light">
+    <h2 class="section-title">👨‍⚕️ Recommended Doctors</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="doctor-card">
+          <h5><a href="https://www.google.com/search?q=Dr.+Ravi+Malik+Cardiologist" target="_blank">Dr. Ravi Malik</a></h5>
+          <p>Phone: +91-9876543210</p>
+          <p>Specialization: Cardiologist</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="doctor-card">
+          <h5><a href="https://www.google.com/search?q=Dr.+Anita+Sharma+General+Physician" target="_blank">Dr. Anita Sharma</a></h5>
+          <p>Phone: +91-9123456789</p>
+          <p>Specialization: General Physician</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="doctor-card">
+          <h5><a href="https://www.google.com/search?q=Dr.+Arun+Kumar+Pediatrician" target="_blank">Dr. Arun Kumar</a></h5>
+          <p>Phone: +91-9988776655</p>
+          <p>Specialization: Pediatrician</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS: Wikipedia + Google Maps -->
+<script>
+  const disease = "Malaria"; // Replace dynamically in real use
+  document.getElementById("disease-title").innerText = disease;
+
+  // Disease Description
+  fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(disease)}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("disease-description").innerText = data.extract || "No description found.";
+    }).catch(() => {
+      document.getElementById("disease-description").innerText = "Error fetching disease info.";
+    });
+
+  // Precautions
+  fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(disease + " prevention")}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.extract && data.extract.length > 10) {
+        document.getElementById("disease-precautions").innerText = data.extract;
+      } else {
+        document.getElementById("disease-precautions").innerText = "Try searching for preventive measures on Google.";
+      }
+    }).catch(() => {
+      document.getElementById("disease-precautions").innerText = "Error fetching prevention info.";
+    });
+
+  // Google Maps
+  let map;
+  function initMap() {
+    const input = document.getElementById("pac-input");
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 28.6139, lng: 77.2090 },
+      zoom: 13,
+    });
+
+    const autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.bindTo("bounds", map);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) return;
+      map.setCenter(place.geometry.location);
+      map.setZoom(14);
+    });
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAml4ZB_0O4Nb0xjl5iMW3luC2gilR1UO0&libraries=places&callback=initMap" async defer></script>
+</body>
+</html>
